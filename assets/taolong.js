@@ -637,7 +637,13 @@ function draw() {
         } else {
           ctx2.save();
           ctx2.translate(gridX(x), gridY(y));
-          ctx2.rotate(-Math.PI / 2);
+          if (dragonHeaven.facing.x === -1) {
+            ctx2.rotate(Math.PI / 2);
+          } else if (dragonHeaven.facing.y === -1) {
+            ctx2.rotate(Math.PI);
+          } else if (dragonHeaven.facing.x === 1) {
+            ctx2.rotate(-Math.PI / 2);
+          } // faces down by default
           ctx2.fillText("v", 0, 0);
           ctx2.restore();
         }
@@ -646,7 +652,17 @@ function draw() {
         if (grid[x][y] % 1 !== 0) {
           ctx2.fillText("l", gridX(x), 10 + gridY(y));
         } else {
-          ctx2.fillText("v", gridX(x), 10 + gridY(y));
+          ctx2.save();
+          ctx2.translate(gridX(x), gridY(y));
+          if (dragonEarth.facing.x === -1) {
+            ctx2.rotate(Math.PI / 2);
+          } else if (dragonEarth.facing.y === -1) {
+            ctx2.rotate(Math.PI);
+          } else if (dragonEarth.facing.x === 1) {
+            ctx2.rotate(-Math.PI / 2);
+          } // faces down by default
+          ctx2.fillText("v", 0, 0);
+          ctx2.restore();
         }
       }
     }
