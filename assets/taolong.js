@@ -514,7 +514,7 @@ function selection(x, y) {
 
 function selectionElem(x, y) {
   if (((x - gridX(curDra.pos[0].x))**2 + (y - gridY(curDra.pos[0].y))**2) <= (10**2)) {
-    // Expell Element
+    // Expel Element
     ctx3.clearRect(0, 0, humanWidth + baGuaWidth, height);
     let t = {two: {x: curDra.pos[0].x + curDra.facing.x,
                      y: curDra.pos[0].y + curDra.facing.y},
@@ -528,13 +528,13 @@ function selectionElem(x, y) {
                      y: curDra.pos[0].y + 3 * curDra.facing.y}};
 
     if (onBoard(t.two.x, t.two.y) && (grid[t.two.x][t.two.y] > 0)) {
-      curOpp.takeDamage(2 + curDra.expell(elementPhase));
+      curOpp.takeDamage(2 + curDra.expel(elementPhase));
     } else if ((onBoard(t.one[0].x, t.one[0].y) && (grid[t.one[0].x][t.one[0].y] > 0))
             || (onBoard(t.one[1].x, t.one[1].y) && (grid[t.one[1].x][t.one[1].y] > 0))
             || (onBoard(t.one[2].x, t.one[2].y) && (grid[t.one[2].x][t.one[2].y] > 0))) {
-      curOpp.takeDamage(1 + curDra.expell(elementPhase));
+      curOpp.takeDamage(1 + curDra.expel(elementPhase));
     } else if (onBoard(t.zero.x, t.zero.y) && (grid[t.zero.x][t.zero.y] > 0)) {
-      curOpp.takeDamage(0 + curDra.expell(elementPhase));
+      curOpp.takeDamage(0 + curDra.expel(elementPhase));
     }
 
     curState = gameStates.NONE;

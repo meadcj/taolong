@@ -16,7 +16,6 @@ class Dragon {
     for (let i = 1; i < this.pos.length; i++) {
       newPos.push(this.pos[i - 1]);
     }
-    //console.log(newPositions);
     this.pos = newPos;
     this.facing = facing;
     console.log("biteflag: " + bite);
@@ -36,8 +35,6 @@ class Dragon {
     if (dam > 4) {
       while (dam > 0) {
         if (dam % 4 !== 0) {
-          console.log("Damage: " + dam);
-          console.log("Remainder: " + dam % 4);
           this.takeDamage(dam % 4);
           dam -= dam % 4;
         } else if (Math.floor(dam / 4) > 0) {
@@ -58,45 +55,9 @@ class Dragon {
     }
   }
 
-/*
-
-    if ((dam > 0) && (dam <= this.water)) {
-      this.water -= dam;
-      centerWater += dam;
-      if (this.water === 0) {this.loseSeg()}
-    } else if ((dam > 0) && (dam > this.water)) {
-      if (dam <= 4) {
-
-      }
-      while (dam > 0) {
-        if (dam % 4 !== 0) {
-          console.log("Damage: " + dam);
-          console.log("Remainder: " + dam % 4);
-          this.takeDamage(dam % 4);
-          dam -= dam % 4;
-        } else if (Math.floor(dam / 4) > 0) {
-          this.takeDamage(4);
-          dam -= 4;
-        }
-      }
-    }
-
-/*
-    this.water -= dam; - 6
-    centerWater += dam; 12
-    if (this.water <= 0) {
-      let newDam = -this.water; 6
-      centerWater -= 4; 8
-      this.water += 4; -2
-      this.segments -= 1;
-      this.pos.pop();
-      if (newDam > 0) {this.takeDamage(newDam)}
-    } */
-
-
   loseSeg() {
     // If only one position (aka zero segments) then it will trigger game over
-    // No need to continue losing segs. Causes "undefined" errors related to 
+    // No need to continue losing segs. Causes "undefined" errors related to
     // absent pos[0].
     if (this.pos.length < 2) {return}
     this.pos.pop();
@@ -115,7 +76,7 @@ class Dragon {
     }
   }
 
-  expell(elem) {
+  expel(elem) {
     if (elem === "fire") {
       let dam = this.fire;
       centerFire += this.fire;
