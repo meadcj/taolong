@@ -95,6 +95,10 @@ class Dragon {
 
 
   loseSeg() {
+    // If only one position (aka zero segments) then it will trigger game over
+    // No need to continue losing segs. Causes "undefined" errors related to 
+    // absent pos[0].
+    if (this.pos.length < 2) {return}
     this.pos.pop();
     centerWater -= 4;
     this.water = 4;

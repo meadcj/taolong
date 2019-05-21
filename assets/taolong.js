@@ -12,6 +12,7 @@ const turns = {
   E_TURN: Symbol("e_turn")};
 const gameStates = {
   NONE: Symbol("none"),
+  NO_MOVES: Symbol("no_moves"),
   SELECT: Symbol("select"),
   SELECT_ELEM: Symbol("select_elem"),
   GAME_OVER: Symbol("game_over")};
@@ -213,7 +214,15 @@ function initBoard() {
 
 function moveStones(location) {
   if (stones[location] > 0) {
-    if (makeMove((location + stones[location]) % 8)) {
+    if (curState === gameStates.NO_MOVES) {
+      let stonesToMove = stones[location];
+      stones[location] = 0;
+      for (let i = 1; i <= stonesToMove; i++) {
+        stones[(location + i) % 8] += 1;
+      }
+      curState = gameStates.NONE;
+      endTurn();
+    } else if (makeMove((location + stones[location]) % 8)) {
       let stonesToMove = stones[location];
       stones[location] = 0;
       for (let i = 1; i <= stonesToMove; i++) {
@@ -223,11 +232,101 @@ function moveStones(location) {
   }
 }
 
+function checkMove(location) {
+  switch (location) {
+    // Heaven
+    case 0:
+      // check for correct facing
+      if ((curDra.facing.y !== 0)
+          && (checkValid(curDra.pos[0].x, curDra.pos[0].y + 2*curDra.facing.y))) {
+        // check for collisions on path
+        if ((grid[curDra.pos[0].x][curDra.pos[0].y + curDra.facing.y] === 0)
+            && (grid[curDra.pos[0].x][curDra.pos[0].y + 2*curDra.facing.y] === 0)) {
+          return true;
+        }
+      }
+      return false;
+    // Lake
+    case 1:
+      // check facing
+      if (curDra.facing.x !== 0) {
+        return true;
+      } else if (checkValid(curDra.pos[0].x + 1, curDra.pos[0].y)
+              || checkValid(curDra.pos[0].x - 1, curDra.pos[0].y)
+              || checkValid(curDra.pos[0].x, curDra.pos[0].y + curDra.facing.y)) {
+        return true;
+      } else {return false}
+    // Fire
+    case 2:
+      if (checkValid(curDra.pos[0].x + 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x - 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y - 1)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y + 1)) {
+        return true;
+      }
+      return false;
+    // Thunder
+    case 3:
+      // check for correct facing
+      // Must face horizontally
+      if (curDra.facing.x !== 0) {
+        // check for one valid move
+        if ((checkValid(curDra.pos[0].x, curDra.pos[0].y - 1)
+            || checkValid(curDra.pos[0].x, curDra.pos[0].y + 1))) {
+          return true;
+        }
+      }
+      return false;
+    // Earth
+    case 4:
+      // check for correct facing
+      if ((curDra.facing.x !== 0)
+          && (checkValid(curDra.pos[0].x + 2*curDra.facing.x, curDra.pos[0].y))) {
+        // check for collisions on path
+        if ((grid[curDra.pos[0].x + curDra.facing.x][curDra.pos[0].y] === 0)
+            && (grid[curDra.pos[0].x + 2*curDra.facing.x][curDra.pos[0].y] === 0)) {
+          return true;
+        }
+      }
+      return false;
+    // Mountain
+    case 5:
+      // check facing
+      if (curDra.facing.y !== 0) {
+        return true;
+      } else if (checkValid(curDra.pos[0].x, curDra.pos[0].y - 1)
+              || checkValid(curDra.pos[0].x, curDra.pos[0].y + 1)
+              || checkValid(curDra.pos[0].x + curDra.facing.x, curDra.pos[0].y)) {
+        return true;
+      } else {return false}
+    // Water
+    case 6:
+      if (checkValid(curDra.pos[0].x + 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x - 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y - 1)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y + 1)) {
+        return true;
+      }
+      return false;
+    // Wind
+    case 7:
+      // check for correct facing
+      // Must face vertically
+      if (curDra.facing.y !== 0) {
+        // check for one valid move
+        if ((checkValid(curDra.pos[0].x + 1, curDra.pos[0].y)
+            || checkValid(curDra.pos[0].x - 1, curDra.pos[0].y))) {
+          return true;
+        }
+      }
+      return false;
+  }
+}
+
 function makeMove(location) {
   switch (location) {
     // Heaven
     case 0:
-      console.log(curDra.facing);
       // check for correct facing
       if ((curDra.facing.y !== 0)
           && (checkValid(curDra.pos[0].x, curDra.pos[0].y + 2*curDra.facing.y))) {
@@ -257,21 +356,28 @@ function makeMove(location) {
         choicesAdd(curDra.pos[0].x - 1, curDra.pos[0].y);
         choicesAdd(curDra.pos[0].x, curDra.pos[0].y + curDra.facing.y);
         return true;
-      }
+      } else {return false}
     // Fire
     case 2:
-      // activate selection mode
-      curState = gameStates.SELECT;
-      // highlight valid moves for selection
-      choicesAdd(curDra.pos[0].x + 1, curDra.pos[0].y);
-      choicesAdd(curDra.pos[0].x - 1, curDra.pos[0].y);
-      choicesAdd(curDra.pos[0].x, curDra.pos[0].y - 1);
-      choicesAdd(curDra.pos[0].x, curDra.pos[0].y + 1);
-      elementPhase = "fire";
-      return true;
+      if (checkValid(curDra.pos[0].x + 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x - 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y - 1)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y + 1)) {
+        // activate selection mode
+        curState = gameStates.SELECT;
+        // highlight valid moves for selection
+        choicesAdd(curDra.pos[0].x + 1, curDra.pos[0].y);
+        choicesAdd(curDra.pos[0].x - 1, curDra.pos[0].y);
+        choicesAdd(curDra.pos[0].x, curDra.pos[0].y - 1);
+        choicesAdd(curDra.pos[0].x, curDra.pos[0].y + 1);
+        elementPhase = "fire";
+        return true;
+      }
+      return false;
     // Thunder
     case 3:
       // check for correct facing
+      // Must face horizontally
       if (curDra.facing.x !== 0) {
         // check for one valid move
         if ((checkValid(curDra.pos[0].x, curDra.pos[0].y - 1)
@@ -284,9 +390,8 @@ function makeMove(location) {
           (extraTurn === 0) ? extraTurn = 1 : extraTurn = 0;
           return true;
         }
-
-        return true;
-      } else {return false}
+      }
+      return false;
     // Earth
     case 4:
       // check for correct facing
@@ -318,21 +423,28 @@ function makeMove(location) {
         choicesAdd(curDra.pos[0].x, curDra.pos[0].y + 1);
         choicesAdd(curDra.pos[0].x + curDra.facing.x, curDra.pos[0].y);
         return true;
-      }
+      } else {return false}
     // Water
     case 6:
-      // activate selection mode
-      curState = gameStates.SELECT;
-      // highlight valid moves for selection
-      choicesAdd(curDra.pos[0].x + 1, curDra.pos[0].y);
-      choicesAdd(curDra.pos[0].x - 1, curDra.pos[0].y);
-      choicesAdd(curDra.pos[0].x, curDra.pos[0].y - 1);
-      choicesAdd(curDra.pos[0].x, curDra.pos[0].y + 1);
-      elementPhase = "water";
-      return true;
+      if (checkValid(curDra.pos[0].x + 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x - 1, curDra.pos[0].y)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y - 1)
+          || checkValid(curDra.pos[0].x, curDra.pos[0].y + 1)) {
+        // activate selection mode
+        curState = gameStates.SELECT;
+        // highlight valid moves for selection
+        choicesAdd(curDra.pos[0].x + 1, curDra.pos[0].y);
+        choicesAdd(curDra.pos[0].x - 1, curDra.pos[0].y);
+        choicesAdd(curDra.pos[0].x, curDra.pos[0].y - 1);
+        choicesAdd(curDra.pos[0].x, curDra.pos[0].y + 1);
+        elementPhase = "water";
+        return true;
+      }
+      return false;
     // Wind
     case 7:
       // check for correct facing
+      // Must face vertically
       if (curDra.facing.y !== 0) {
         // check for one valid move
         if ((checkValid(curDra.pos[0].x + 1, curDra.pos[0].y)
@@ -345,9 +457,8 @@ function makeMove(location) {
           (extraTurn === 0) ? extraTurn = 1 : extraTurn = 0;
           return true;
         }
-
-        return true;
-      } else {return false}
+      }
+      return false;
   }
 }
 
@@ -440,6 +551,15 @@ function selectionElem(x, y) {
   }
 }
 
+function checkIfMove() {
+  for (let i = 0; i < stones.length; i++) {
+    if (stones[i] > 0) {
+      if (checkMove((i + stones[i]) % 8)) {return true}
+    }
+  }
+  return false;
+}
+
 function endTurn() {
   if (curOpp.segments <= 0 || curDra.segments <= 0) {
     curState = gameStates.GAME_OVER;
@@ -458,8 +578,18 @@ function endTurn() {
       // need to do an OR test to see if at least one of those returns "true"
       // if so proceed
       // if not, send message, do 1 point of damage to dragon, and endTurn()
+    if (!checkIfMove()) {
+      curDra.takeDamage(1);
+      console.log("No Moves");
+      curState = gameStates.NO_MOVES;
+    }
   } else {
     extraTurn = 2;
+    if (!checkIfMove()) {
+      curDra.takeDamage(1);
+      console.log("No Moves");
+      curState = gameStates.NO_MOVES;
+    }
   }
 }
 
@@ -479,12 +609,12 @@ function update() {
   for (let i = 0; i < dragonHeaven.pos.length; i++) {
     let x = dragonHeaven.pos[i].x;
     let y = dragonHeaven.pos[i].y;
-    grid[x][y] = 1;
+    grid[x][y] = 1 + i/10;
   }
   for (let i = 0; i < dragonEarth.pos.length; i++) {
     let x = dragonEarth.pos[i].x;
     let y = dragonEarth.pos[i].y;
-    grid[x][y] = 2;
+    grid[x][y] = 2 + i/10;
   }
 }
 
@@ -500,12 +630,24 @@ function draw() {
   ctx2.textAlign = "center";
   for (let x = 0; x < grid.length; x++) {
     for (let y = 0; y < grid[x].length; y++) {
-      if (grid[x][y] === 1) {
+      if (Math.floor(grid[x][y]) === 1) {
         ctx2.fillStyle = "White";
-        ctx2.fillText(grid[x][y], gridX(x), 10 + gridY(y));
-      } else if (grid[x][y] === 2) {
+        if (grid[x][y] % 1 !== 0) {
+          ctx2.fillText("l", gridX(x), 10 + gridY(y));
+        } else {
+          ctx2.save();
+          ctx2.translate(gridX(x), gridY(y));
+          ctx2.rotate(-Math.PI / 2);
+          ctx2.fillText("v", 0, 0);
+          ctx2.restore();
+        }
+      } else if (Math.floor(grid[x][y]) === 2) {
         ctx2.fillStyle = "Black";
-        ctx2.fillText(grid[x][y], gridX(x), 10 + gridY(y));
+        if (grid[x][y] % 1 !== 0) {
+          ctx2.fillText("l", gridX(x), 10 + gridY(y));
+        } else {
+          ctx2.fillText("v", gridX(x), 10 + gridY(y));
+        }
       }
     }
   }

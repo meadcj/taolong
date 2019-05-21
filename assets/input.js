@@ -1,6 +1,6 @@
 
 function mouseDown() {
-  if (curState === gameStates.NONE) {
+  if (curState === gameStates.NONE || curState === gameStates.NO_MOVES) {
     if (((event.clientX - baGuaPoints[0][0])**2 +
         (event.clientY - baGuaPoints[0][1])**2) <= (20**2)) {
       console.log("box0");
