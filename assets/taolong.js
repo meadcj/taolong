@@ -95,11 +95,13 @@ let stones = [2, 0, 2, 0, 2, 0, 2, 0];
 let lastTime = null;
 let timeSinceLastFrameSwap = 0;
 let counter = 0;
+
 let curTurn = turns.H_TURN;
 let curDra = (curTurn === turns.H_TURN) ? dragonHeaven : dragonEarth;
 let curOpp = (curTurn === turns.H_TURN) ? dragonEarth : dragonHeaven;
 let curState = gameStates.NONE;
 let choices = [];
+let curMove = null;
 let extraTurn = 0;
 let elementPhase = null;
 
@@ -223,6 +225,7 @@ function moveStones(location) {
       curState = gameStates.NONE;
       endTurn();
     } else if (makeMove((location + stones[location]) % 8)) {
+      if (!curMove) {curMove = (location + stones[location]) % 8}
       let stonesToMove = stones[location];
       stones[location] = 0;
       for (let i = 1; i <= stonesToMove; i++) {
@@ -573,6 +576,7 @@ function endTurn() {
     console.log("Eseg: " + dragonEarth.segments);
     console.log("Ew: " + dragonEarth.water);
     extraTurn = 0;
+    curMove = null;
     // check for valid moves for new dragon ...
       // need to generate a list of moves that can be triggered based on stones
       // need to do an OR test to see if at least one of those returns "true"
@@ -585,6 +589,7 @@ function endTurn() {
     }
   } else {
     extraTurn = 2;
+    curMove = null;
     if (!checkIfMove()) {
       curDra.takeDamage(1);
       console.log("No Moves");
@@ -726,6 +731,26 @@ function draw() {
     ctx2.arc(baGuaCenter.x - 52.5 + x*15, baGuaCenter.y + 20, 6, 0, 2 * Math.PI, false);
     ctx2.fill();
   }
+
+// This is causing some issues
+// It also revealed that I should probably refactor
+//
+// Specifically, the current setup of overlapping board movement and turn
+// ending (and how this functions differently for different moves) is likely
+// to lead to more trouble down the line. The checkMove logic already lays the
+// groundwork for a design that properly orders move selection, movement
+// enaction, and turn ending. This might also allow for unde/move cancelling.
+/*
+  // Ring highlight of current move
+  console.log(curMove);
+  if (curMove) {
+    ctx2.beginPath();
+    ctx2.strokeStyle = "Black";
+    ctx2.lineWidth = 3;
+    ctx2.arc(baGuaPoints[curMove][0], baGuaPoints[curMove][1], 20, 0, 2 * Math.PI, false);
+    ctx2.stroke();
+    ctx2.lineWidth = 1;
+  } */
 }
 
 function step(timestamp) {
