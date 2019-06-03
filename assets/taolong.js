@@ -238,6 +238,7 @@ function moveStones(location) {
 function checkMove(location) {
   switch (location) {
     // Heaven
+    // Needs revision: only 1 valid space is required
     case 0:
       // check for correct facing
       if ((curDra.facing.y !== 0)
@@ -281,6 +282,7 @@ function checkMove(location) {
       }
       return false;
     // Earth
+    // Needs revision: only 1 valid space is required
     case 4:
       // check for correct facing
       if ((curDra.facing.x !== 0)
@@ -329,6 +331,7 @@ function checkMove(location) {
 function makeMove(location) {
   switch (location) {
     // Heaven
+    // Needs revision: only 1 valid space is required
     case 0:
       // check for correct facing
       if ((curDra.facing.y !== 0)
@@ -396,6 +399,7 @@ function makeMove(location) {
       }
       return false;
     // Earth
+    // Needs revision: only 1 valid space is required
     case 4:
       // check for correct facing
       if ((curDra.facing.x !== 0)
