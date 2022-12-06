@@ -11,3 +11,4 @@ For Fire and Water moves, the choice of absorbing or expelling the element is pr
 If no valid move is available, a message will appear (currently only in the developer's console). The current player must then select a circle from which to move stones, but no move will follow.
 
 The current turn is indicated by the color-coded Yang or Yin symbol.
+
